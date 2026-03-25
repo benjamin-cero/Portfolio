@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Benjamin Cero – Full Stack Developer & Software Engineer. Explore my portfolio, projects, and skills." />
+  <title>Benjamin Cero | Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background canvas for particles -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <span class="nav-logo">BC<span class="dot">.</span></span>
+      <ul class="nav-links">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#apps">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <ul>
+      <li><a href="#hero" class="mobile-link">Home</a></li>
+      <li><a href="#about" class="mobile-link">About</a></li>
+      <li><a href="#skills" class="mobile-link">Skills</a></li>
+      <li><a href="#apps" class="mobile-link">Projects</a></li>
+      <li><a href="#contact" class="mobile-link">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-badge reveal">
+        <span class="badge-dot"></span>
+        Available for work
+      </div>
+      <h1 class="reveal">
+        Hi, I'm <span class="gradient-text">Benjamin</span><br />
+          I turn ideas<br />into software.
+      </h1>
+      <p class="hero-sub reveal">
+        Full Stack Developer crafting modern, performant,<br />
+        and beautifully designed software solutions.
+      </p>
+      <div class="hero-cta reveal">
+        <a href="#apps" class="btn-primary">View Projects</a>
+        <a href="#contact" class="btn-ghost">Get in Touch</a>
+      </div>
+      <div class="hero-scroll reveal">
+        <div class="scroll-line"></div>
+        <span>Scroll down</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="avatar-ring">
+        <div class="avatar-circle">
+          <span class="avatar-initials">BC</span>
+        </div>
+        <div class="orbit orbit-1">
+          <div class="orbit-dot"></div>
+        </div>
+        <div class="orbit orbit-2">
+          <div class="orbit-dot"></div>
+        </div>
+        <div class="orbit orbit-3">
+          <div class="orbit-dot"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about">
+    <div class="section-inner">
+      <div class="section-tag reveal">About Me</div>
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <h2>From concept to <span class="gradient-text">code</span></h2>
+          <p>
+              Passionate Full Stack Developer building clean, efficient, and user-friendly apps
+          </p>
+          <p>
+              Experienced in web, mobile, and backend – creating apps that scale.
+          </p>
+          <div class="about-stats">
+            <div class="stat-card">
+              <span class="stat-number" data-target="2">0</span>
+              <span class="stat-plus">+</span>
+              <span class="stat-label">Projects<br/>Completed</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" data-target="2">0</span>
+              <span class="stat-plus">+</span>
+              <span class="stat-label">Years<br/>Experience</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" data-target="6">0</span>
+              <span class="stat-plus">+</span>
+              <span class="stat-label">Tech<br/>Stacks</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-card-wrap reveal">
+          <div class="about-card glass">
+            <div class="card-line">
+              <span class="card-icon">🎓</span>
+              <div>
+                <strong>Education</strong>
+                <p>Faculty of Information Technologies</p>
+              </div>
+            </div>
+            <div class="card-line">
+              <span class="card-icon">📍</span>
+              <div>
+                <strong>Location</strong>
+                <p>Konjic, Bosnia & Herzegovina</p>
+              </div>
+            </div>
+            <div class="card-line">
+              <span class="card-icon">💼</span>
+              <div>
+                <strong>Focus</strong>
+                <p>Full Stack & Mobile Development</p>
+              </div>
+            </div>
+            <div class="card-line">
+              <span class="card-icon">🌐</span>
+              <div>
+                <strong>Languages</strong>
+                <p>Bosnian, English</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills">
+    <div class="section-inner">
+      <div class="section-tag reveal">Tech Stack</div>
+      <h2 class="section-title reveal">Skills &amp; Technologies</h2>
+      <div class="skills-grid reveal">
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">📱</span> Mobile</h3>
+          <div class="skill-tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">Dart</span>
+            <span class="tag">Android</span>
+          </div>
+        </div>
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">🌐</span> Frontend</h3>
+          <div class="skill-tags">
+            <span class="tag">HTML</span>
+            <span class="tag">CSS</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag">Angular</span>
+            <span class="tag">TypeScript</span>
+          </div>
+        </div>
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">⚙️</span> Backend</h3>
+          <div class="skill-tags">
+            <span class="tag">ASP.NET Core</span>
+            <span class="tag">C#</span>
+            <span class="tag">REST API</span>
+            <span class="tag">Node.js</span>
+          </div>
+        </div>
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">🗄️</span> Database</h3>
+          <div class="skill-tags">
+            <span class="tag">SQL Server</span>
+            <span class="tag">PostgreSQL</span>
+            <span class="tag">Supabase</span>
+          </div>
+        </div>
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">☁️</span> DevOps &amp; Cloud</h3>
+          <div class="skill-tags">
+            <span class="tag">Docker</span>
+            <span class="tag">Render</span>
+            <span class="tag">Vercel</span>
+            <span class="tag">Git</span>
+          </div>
+        </div>
+
+        <div class="skill-category glass">
+          <h3><span class="cat-icon">🎨</span> Design</h3>
+          <div class="skill-tags">
+            <span class="tag">Figma</span>
+            <span class="tag">UI/UX</span>
+            <span class="tag">Responsive Design</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects / Apps Section -->
+  <section id="apps">
+    <div class="section-inner">
+      <div class="section-tag reveal">Projects</div>
+      <h2 class="section-title reveal">My Applications</h2>
+      <p class="section-sub reveal">
+        Click an app to launch or download it.
+      </p>
+
+      <!-- App Icons Grid -->
+      <div class="apps-grid reveal" id="apps-grid">
+
+        <!-- CineScreen — opens web app -->
+        <a class="app-icon" href="https://cine-screen.vercel.app/" target="_blank">
+          <img src="Assets/Cinescreen Logo.jpg" alt="CineScreen" />
+          <span>CineScreen</span>
+          <span class="app-badge web">Web App</span>
+        </a>
+
+        <!-- ParkHere Desktop — download admin RAR -->
+        <a class="app-icon" href="https://github.com/benjamin-cero/Releases/releases/download/park-here-admin/ParkHere.Admin.rar" target="_blank">
+          <img src="Assets/ParkHereDesktop.jpg" alt="ParkHere Admin" />
+          <span>ParkHere Admin</span>
+          <span class="app-badge desktop">Desktop App</span>
+        </a>
+
+        <!-- ParkHere Mobile — download APK -->
+        <a class="app-icon" href="https://github.com/benjamin-cero/Releases/releases/download/park-here/park-here.apk" target="_blank">
+          <img src="Assets/ParkHereMobile.jpg" alt="ParkHere Mobile" />
+          <span>ParkHere Mobile</span>
+          <span class="app-badge mobile">Mobile App</span>
+        </a>
+
+      </div>
+
+      <!-- Backend Wake-Up Service -->
+      <div class="wakeup-section reveal">
+        <div class="wakeup-header">
+          <span class="wakeup-icon">⚡</span>
+          <div>
+            <h3>Backend Services</h3>
+            <p>Free-tier servers sleep after inactivity. Wake them up before using the apps.</p>
+          </div>
+        </div>
+        <div class="wakeup-buttons">
+          <button class="wakeup-btn" id="wake-cinescreen" data-url="https://cinescreen-deployment.onrender.com">
+            <span class="wakeup-dot" id="dot-cinescreen"></span>
+            <span>CineScreen Backend</span>
+            <span class="wakeup-status" id="status-cinescreen">Click to wake</span>
+          </button>
+          <button class="wakeup-btn" id="wake-parkhere" data-url="https://parkhere-deployment.onrender.com">
+            <span class="wakeup-dot" id="dot-parkhere"></span>
+            <span>ParkHere Backend</span>
+            <span class="wakeup-status" id="status-parkhere">Click to wake</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <div class="section-inner">
+      <div class="section-tag reveal">Contact</div>
+      <h2 class="section-title reveal">Let's work together</h2>
+      <p class="section-sub reveal">
+        Have a project in mind or just want to say hi?<br />
+        My inbox is always open.
+      </p>
+      <div class="contact-row reveal">
+        <a href="mailto:benjamin.cero25@gmail.com" class="contact-card glass" id="email-card">
+          <span class="contact-icon">✉️</span>
+          <div>
+            <strong>Email</strong>
+            <p>benjamin.cero25@gmail.com</p>
+          </div>
+        </a>
+        <a href="https://github.com/benjamin-cero" target="_blank" class="contact-card glass" id="github-card">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385
+              .6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41
+              -.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23
+              1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925
+              0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23
+              .96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23
+              .66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925
+              .435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57
+              A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+          </span>
+          <div>
+            <strong>GitHub</strong>
+            <p>github.com/benjamin-cero</p>
+          </div>
+        </a>
+        <div class="contact-card glass" id="phone-card">
+          <span class="contact-icon">📞</span>
+          <div>
+            <strong>Phone</strong>
+            <p>+387 62 126 822</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Benjamin Cero. Crafted with passion.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
