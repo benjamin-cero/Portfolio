@@ -57,10 +57,11 @@ ul { list-style: none; }
 }
 
 #navbar.scrolled {
-  background: rgba(8,11,18,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+  transform: translateZ(0);
 }
 
 .nav-inner {
@@ -200,19 +201,22 @@ section {
 .glass {
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius);
+  transform: translateZ(0);
 }
 
 /* Reveal animation */
 .reveal {
   opacity: 0;
-  transform: translateY(32px);
+  transform: translate3d(0,32px,0);
   transition: opacity .7s ease, transform .7s ease;
+  will-change: opacity, transform;
 }
 .reveal.visible {
   opacity: 1;
+  will-change: auto;
   transform: translateY(0);
 }
 

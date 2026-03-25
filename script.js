@@ -1,22 +1,33 @@
 /* ========================
-   PARTICLE BACKGROUND
+   PARTICLE BACKGROUND (optimized)
 ======================== */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
+let canvasW = 0, canvasH = 0;
 
 function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvasW = canvas.width = window.innerWidth;
+  canvasH = canvas.height = window.innerHeight;
 }
 resize();
-window.addEventListener('resize', resize);
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resize, 150);
+});
+
+// Fewer particles, simpler — still looks the same
+const PARTICLE_COUNT = 60;
+const CONNECT_DIST = 100;
+const CONNECT_DIST_SQ = CONNECT_DIST * CONNECT_DIST; // avoid sqrt
 
 class Particle {
   constructor() { this.reset(); }
   reset() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
+    this.x = Math.random() * canvasW;
+    this.y = Math.random() * canvasH;
     this.r = Math.random() * 1.5 + 0.3;
     this.alpha = Math.random() * 0.45 + 0.05;
     this.speedX = (Math.random() - 0.5) * 0.2;
@@ -25,71 +36,100 @@ class Particle {
   update() {
     this.x += this.speedX;
     this.y += this.speedY;
-    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+    if (this.x < 0 || this.x > canvasW || this.y < 0 || this.y > canvasH) {
       this.reset();
     }
   }
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(108,99,255,${this.alpha})`;
-    ctx.fill();
-  }
 }
 
-// Init particles
-for (let i = 0; i < 120; i++) particles.push(new Particle());
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
-function drawConnections() {
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 110) {
+// Pre-compute color string
+const PARTICLE_COLOR = '108,99,255';
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // Batch: draw all particles in one path
+  const len = particles.length;
+  for (let i = 0; i < len; i++) {
+    const p = particles[i];
+    p.update();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, 6.2832); // 2*PI
+    ctx.fillStyle = `rgba(${PARTICLE_COLOR},${p.alpha})`;
+    ctx.fill();
+  }
+
+  // Connections — use squared distance (no sqrt), batch similar lines
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < len; i++) {
+    const a = particles[i];
+    for (let j = i + 1; j < len; j++) {
+      const b = particles[j];
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < CONNECT_DIST_SQ) {
+        const alpha = 0.08 * (1 - Math.sqrt(distSq) / CONNECT_DIST);
         ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(108,99,255,${0.08 * (1 - dist / 110)})`;
-        ctx.lineWidth = 0.5;
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(${PARTICLE_COLOR},${alpha})`;
         ctx.stroke();
       }
     }
   }
-}
 
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => { p.update(); p.draw(); });
-  drawConnections();
   requestAnimationFrame(animateParticles);
 }
 animateParticles();
 
 /* ========================
-   NAVBAR SCROLL
+   SCROLL HANDLER (single, throttled via rAF)
 ======================== */
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 30);
-  highlightNavLink();
-});
+const heroContent = document.querySelector('.hero-content');
+const heroVisual = document.querySelector('.hero-visual');
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
 
-/* ========================
-   ACTIVE NAV LINK
-======================== */
-function highlightNavLink() {
-  const sections = document.querySelectorAll('section[id]');
-  const links = document.querySelectorAll('.nav-links a');
+let scrollTicking = false;
+
+window.addEventListener('scroll', () => {
+  if (!scrollTicking) {
+    requestAnimationFrame(handleScroll);
+    scrollTicking = true;
+  }
+}, { passive: true });
+
+function handleScroll() {
+  const y = window.scrollY;
+
+  // Navbar bg
+  navbar.classList.toggle('scrolled', y > 30);
+
+  // Active nav link
   let current = '';
-  sections.forEach(sec => {
-    const top = sec.offsetTop - 120;
-    if (window.scrollY >= top) current = sec.getAttribute('id');
-  });
-  links.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === `#${current}`) link.classList.add('active');
-  });
+  for (let i = 0; i < sections.length; i++) {
+    if (y >= sections[i].offsetTop - 120) current = sections[i].id;
+  }
+  for (let i = 0; i < navLinks.length; i++) {
+    const link = navLinks[i];
+    if (link.getAttribute('href') === `#${current}`) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  }
+
+  // Parallax (only on hero, GPU-accelerated with translate3d)
+  if (heroContent && heroVisual) {
+    heroContent.style.transform = `translate3d(0,${y * 0.12}px,0)`;
+    heroVisual.style.transform = `translate3d(0,${y * 0.07}px,0)`;
+  }
+
+  scrollTicking = false;
 }
 
 /* ========================
@@ -156,39 +196,38 @@ const statObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.stat-number').forEach(el => statObserver.observe(el));
 
 /* ========================
-   SMOOTH PARALLAX HERO
-======================== */
-window.addEventListener('scroll', () => {
-  const heroContent = document.querySelector('.hero-content');
-  const heroVisual = document.querySelector('.hero-visual');
-  if (!heroContent || !heroVisual) return;
-  const y = window.scrollY;
-  heroContent.style.transform = `translateY(${y * 0.12}px)`;
-  heroVisual.style.transform = `translateY(${y * 0.07}px)`;
-});
-
-/* ========================
-   CURSOR GLOW (subtle)
+   CURSOR GLOW (GPU-accelerated)
 ======================== */
 const glow = document.createElement('div');
 glow.id = 'cursor-glow';
 Object.assign(glow.style, {
   position: 'fixed',
+  top: '0',
+  left: '0',
   width: '350px',
   height: '350px',
   borderRadius: '50%',
   background: 'radial-gradient(circle, rgba(108,99,255,0.07) 0%, transparent 70%)',
   pointerEvents: 'none',
-  transform: 'translate(-50%,-50%)',
   zIndex: '0',
-  transition: 'opacity .3s',
+  willChange: 'transform',
 });
 document.body.appendChild(glow);
 
+let glowX = 0, glowY = 0;
+let glowRAF = false;
+
 window.addEventListener('mousemove', (e) => {
-  glow.style.left = e.clientX + 'px';
-  glow.style.top = e.clientY + 'px';
-});
+  glowX = e.clientX;
+  glowY = e.clientY;
+  if (!glowRAF) {
+    glowRAF = true;
+    requestAnimationFrame(() => {
+      glow.style.transform = `translate3d(${glowX - 175}px,${glowY - 175}px,0)`;
+      glowRAF = false;
+    });
+  }
+}, { passive: true });
 
 /* ========================
    BACKEND WAKE-UP SERVICE
