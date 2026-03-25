@@ -1,8 +1,8 @@
 /* ========================
-   PARTICLE BACKGROUND (optimized)
+   PARTICLE BACKGROUND (max optimized)
 ======================== */
 const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: true });
 let particles = [];
 let canvasW = 0, canvasH = 0;
 
@@ -15,78 +15,87 @@ resize();
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(resize, 150);
-});
+  resizeTimer = setTimeout(resize, 200);
+}, { passive: true });
 
-// Fewer particles, simpler — still looks the same
-const PARTICLE_COUNT = 60;
-const CONNECT_DIST = 100;
-const CONNECT_DIST_SQ = CONNECT_DIST * CONNECT_DIST; // avoid sqrt
+const PARTICLE_COUNT = 45;
+const CONNECT_DIST_SQ = 9000; // ~95px squared, skip sqrt entirely
 
 class Particle {
   constructor() { this.reset(); }
   reset() {
     this.x = Math.random() * canvasW;
     this.y = Math.random() * canvasH;
-    this.r = Math.random() * 1.5 + 0.3;
-    this.alpha = Math.random() * 0.45 + 0.05;
-    this.speedX = (Math.random() - 0.5) * 0.2;
-    this.speedY = (Math.random() - 0.5) * 0.2;
+    this.r = Math.random() * 1.5 + 0.4;
+    this.alpha = Math.random() * 0.4 + 0.08;
+    this.vx = (Math.random() - 0.5) * 0.18;
+    this.vy = (Math.random() - 0.5) * 0.18;
   }
   update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    if (this.x < 0 || this.x > canvasW || this.y < 0 || this.y > canvasH) {
-      this.reset();
-    }
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > canvasW || this.y < 0 || this.y > canvasH) this.reset();
   }
 }
 
 for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
 
-// Pre-compute color string
-const PARTICLE_COLOR = '108,99,255';
+// Draw connections every 3rd frame to cut GPU work by ~66%
+let frameCount = 0;
+let isTabVisible = true;
+
+document.addEventListener('visibilitychange', () => {
+  isTabVisible = !document.hidden;
+});
 
 function animateParticles() {
-  ctx.clearRect(0, 0, canvasW, canvasH);
+  if (!isTabVisible) { requestAnimationFrame(animateParticles); return; }
 
-  // Batch: draw all particles in one path
+  ctx.clearRect(0, 0, canvasW, canvasH);
   const len = particles.length;
+
+  // Update + draw particles
+  ctx.fillStyle = 'rgba(108,99,255,0.25)';
   for (let i = 0; i < len; i++) {
     const p = particles[i];
     p.update();
+    ctx.globalAlpha = p.alpha;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, 6.2832); // 2*PI
-    ctx.fillStyle = `rgba(${PARTICLE_COLOR},${p.alpha})`;
+    ctx.arc(p.x, p.y, p.r, 0, 6.2832);
     ctx.fill();
   }
+  ctx.globalAlpha = 1;
 
-  // Connections — use squared distance (no sqrt), batch similar lines
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < len; i++) {
-    const a = particles[i];
-    for (let j = i + 1; j < len; j++) {
-      const b = particles[j];
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const distSq = dx * dx + dy * dy;
-      if (distSq < CONNECT_DIST_SQ) {
-        const alpha = 0.08 * (1 - Math.sqrt(distSq) / CONNECT_DIST);
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = `rgba(${PARTICLE_COLOR},${alpha})`;
-        ctx.stroke();
+  // Connections only every 3rd frame
+  if (frameCount % 3 === 0) {
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < len; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < len; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dSq = dx * dx + dy * dy;
+        if (dSq < CONNECT_DIST_SQ) {
+          ctx.globalAlpha = 0.07 * (1 - dSq / CONNECT_DIST_SQ);
+          ctx.strokeStyle = 'rgb(108,99,255)';
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
       }
     }
+    ctx.globalAlpha = 1;
   }
 
+  frameCount++;
   requestAnimationFrame(animateParticles);
 }
 animateParticles();
 
 /* ========================
-   SCROLL HANDLER (single, throttled via rAF)
+   SINGLE SCROLL HANDLER (rAF throttled)
 ======================== */
 const navbar = document.getElementById('navbar');
 const heroContent = document.querySelector('.hero-content');
@@ -95,18 +104,20 @@ const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
 
 let scrollTicking = false;
+let lastScrollY = 0;
 
 window.addEventListener('scroll', () => {
+  lastScrollY = window.scrollY;
   if (!scrollTicking) {
-    requestAnimationFrame(handleScroll);
     scrollTicking = true;
+    requestAnimationFrame(handleScroll);
   }
 }, { passive: true });
 
 function handleScroll() {
-  const y = window.scrollY;
+  const y = lastScrollY;
 
-  // Navbar bg
+  // Navbar
   navbar.classList.toggle('scrolled', y > 30);
 
   // Active nav link
@@ -123,11 +134,9 @@ function handleScroll() {
     }
   }
 
-  // Parallax (only on hero, GPU-accelerated with translate3d)
-  if (heroContent && heroVisual) {
-    heroContent.style.transform = `translate3d(0,${y * 0.12}px,0)`;
-    heroVisual.style.transform = `translate3d(0,${y * 0.07}px,0)`;
-  }
+  // Parallax (GPU compositing via translate3d)
+  if (heroContent) heroContent.style.transform = `translate3d(0,${y * 0.12}px,0)`;
+  if (heroVisual) heroVisual.style.transform = `translate3d(0,${y * 0.07}px,0)`;
 
   scrollTicking = false;
 }
@@ -137,14 +146,13 @@ function handleScroll() {
 ======================== */
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobile-menu');
-const mobileLinks = document.querySelectorAll('.mobile-link');
 
 hamburger.addEventListener('click', () => {
   hamburger.classList.toggle('open');
   mobileMenu.classList.toggle('open');
 });
 
-mobileLinks.forEach(link => {
+document.querySelectorAll('.mobile-link').forEach(link => {
   link.addEventListener('click', () => {
     hamburger.classList.remove('open');
     mobileMenu.classList.remove('open');
@@ -152,9 +160,8 @@ mobileLinks.forEach(link => {
 });
 
 /* ========================
-   SCROLL REVEAL
+   SCROLL REVEAL (lightweight)
 ======================== */
-const revealEls = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry, i) => {
     if (entry.isIntersecting) {
@@ -162,21 +169,20 @@ const observer = new IntersectionObserver((entries) => {
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.1 });
 
-revealEls.forEach(el => observer.observe(el));
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 /* ========================
    COUNTER ANIMATION
 ======================== */
-function animateCounter(el, target, duration = 1500) {
+function animateCounter(el, target, duration = 1200) {
   let start = 0;
-  const step = (timestamp) => {
-    if (!start) start = timestamp;
-    const progress = Math.min((timestamp - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.floor(eased * target);
-    if (progress < 1) requestAnimationFrame(step);
+  const step = (ts) => {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    el.textContent = Math.floor((1 - Math.pow(1 - p, 3)) * target);
+    if (p < 1) requestAnimationFrame(step);
     else el.textContent = target;
   };
   requestAnimationFrame(step);
@@ -185,10 +191,8 @@ function animateCounter(el, target, duration = 1500) {
 const statObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      const el = entry.target;
-      const target = parseInt(el.dataset.target, 10);
-      animateCounter(el, target);
-      statObserver.unobserve(el);
+      animateCounter(entry.target, parseInt(entry.target.dataset.target, 10));
+      statObserver.unobserve(entry.target);
     }
   });
 }, { threshold: 0.5 });
@@ -196,35 +200,31 @@ const statObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.stat-number').forEach(el => statObserver.observe(el));
 
 /* ========================
-   CURSOR GLOW (GPU-accelerated)
+   CURSOR GLOW (GPU only, no layout thrash)
 ======================== */
 const glow = document.createElement('div');
 glow.id = 'cursor-glow';
 Object.assign(glow.style, {
   position: 'fixed',
-  top: '0',
-  left: '0',
-  width: '350px',
-  height: '350px',
+  top: '0', left: '0',
+  width: '350px', height: '350px',
   borderRadius: '50%',
-  background: 'radial-gradient(circle, rgba(108,99,255,0.07) 0%, transparent 70%)',
+  background: 'radial-gradient(circle, rgba(108,99,255,0.06) 0%, transparent 70%)',
   pointerEvents: 'none',
   zIndex: '0',
   willChange: 'transform',
+  contain: 'layout style paint',
 });
 document.body.appendChild(glow);
 
-let glowX = 0, glowY = 0;
-let glowRAF = false;
-
+let mx = -500, my = -500, glowQueued = false;
 window.addEventListener('mousemove', (e) => {
-  glowX = e.clientX;
-  glowY = e.clientY;
-  if (!glowRAF) {
-    glowRAF = true;
+  mx = e.clientX; my = e.clientY;
+  if (!glowQueued) {
+    glowQueued = true;
     requestAnimationFrame(() => {
-      glow.style.transform = `translate3d(${glowX - 175}px,${glowY - 175}px,0)`;
-      glowRAF = false;
+      glow.style.transform = `translate3d(${mx - 175}px,${my - 175}px,0)`;
+      glowQueued = false;
     });
   }
 }, { passive: true });
@@ -239,7 +239,6 @@ document.querySelectorAll('.wakeup-btn').forEach(btn => {
     const dot = document.getElementById(`dot-${id}`);
     const status = document.getElementById(`status-${id}`);
 
-    // Reset
     dot.className = 'wakeup-dot pinging';
     status.textContent = 'Waking up...';
     btn.disabled = true;
@@ -247,12 +246,11 @@ document.querySelectorAll('.wakeup-btn').forEach(btn => {
 
     try {
       const start = Date.now();
-      const res = await fetch(url, { mode: 'no-cors' });
+      await fetch(url, { mode: 'no-cors' });
       const elapsed = ((Date.now() - start) / 1000).toFixed(1);
       dot.className = 'wakeup-dot online';
       status.textContent = `Online (${elapsed}s)`;
     } catch (err) {
-      // no-cors mode may throw but server still wakes up, try again
       try {
         await fetch(url, { mode: 'no-cors' });
         dot.className = 'wakeup-dot online';

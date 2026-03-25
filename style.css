@@ -199,10 +199,8 @@ section {
 
 /* Glass card */
 .glass {
-  background: var(--glass);
+  background: rgba(20, 25, 40, 0.65); /* A bit more opaque to preserve contrast without blur */
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius);
   transform: translateZ(0);
 }
@@ -386,6 +384,7 @@ section {
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.06);
   animation: spin linear infinite;
+  will-change: transform;
 }
 .orbit-1 { width: 195px; height: 195px; animation-duration: 6s; }
 .orbit-2 { width: 245px; height: 245px; animation-duration: 10s; animation-direction: reverse; }
