@@ -105,6 +105,18 @@ const navLinks = document.querySelectorAll('.nav-links a');
 
 let scrollTicking = false;
 let lastScrollY = 0;
+let sectionOffsets = [];
+
+function updateSectionOffsets() {
+  sectionOffsets = Array.from(sections).map(sec => ({
+    id: sec.id,
+    top: sec.offsetTop
+  }));
+}
+
+window.addEventListener('load', updateSectionOffsets);
+window.addEventListener('resize', () => requestAnimationFrame(updateSectionOffsets), { passive: true });
+updateSectionOffsets(); // initial run
 
 window.addEventListener('scroll', () => {
   lastScrollY = window.scrollY;
@@ -122,8 +134,8 @@ function handleScroll() {
 
   // Active nav link
   let current = '';
-  for (let i = 0; i < sections.length; i++) {
-    if (y >= sections[i].offsetTop - 120) current = sections[i].id;
+  for (let i = 0; i < sectionOffsets.length; i++) {
+    if (y >= sectionOffsets[i].top - 120) current = sectionOffsets[i].id;
   }
   for (let i = 0; i < navLinks.length; i++) {
     const link = navLinks[i];
@@ -135,8 +147,10 @@ function handleScroll() {
   }
 
   // Parallax (GPU compositing via translate3d)
-  if (heroContent) heroContent.style.transform = `translate3d(0,${y * 0.12}px,0)`;
-  if (heroVisual) heroVisual.style.transform = `translate3d(0,${y * 0.07}px,0)`;
+  if (y < window.innerHeight) {
+    if (heroContent) heroContent.style.transform = `translate3d(0,${y * 0.12}px,0)`;
+    if (heroVisual) heroVisual.style.transform = `translate3d(0,${y * 0.07}px,0)`;
+  }
 
   scrollTicking = false;
 }
